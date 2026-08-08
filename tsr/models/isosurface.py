@@ -3,7 +3,31 @@ from typing import Callable, Optional, Tuple
 import numpy as np
 import torch
 import torch.nn as nn
-from torchmcubes import marching_cubes
+
+# Use PyMCubes instead of torchmcubes due to compilation issues
+try:
+    from torchmcubes import marching_cubes as torch_marching_cubes
+    USE_TORCH_MCUBES = True
+except ImportError:
+    import mcubes
+    USE_TORCH_MCUBES = False
+    
+    def marching_cubes(volume, isovalue):
+        """Wrapper for PyMCubes"""
+        # Convert torch tensor to numpy
+        if isinstance(volume, torch.Tensor):
+            volume_np = volume.cpu().numpy()
+        else:
+            volume_np = volume
+        
+        # Run marching cubes
+        vertices, triangles = mcubes.marching_cubes(volume_np, isovalue)
+        
+        # Convert back to torch tensors
+        vertices = torch.from_numpy(vertices).float()
+        triangles = torch.from_numpy(triangles).long()
+        
+        return vertices, triangles
 
 
 class IsosurfaceHelper(nn.Module):
