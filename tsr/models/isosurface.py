@@ -4,9 +4,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-# Use PyMCubes instead of torchmcubes due to compilation issues
+# Prefer torchmcubes, with PyMCubes as a portable fallback.
 try:
-    from torchmcubes import marching_cubes as torch_marching_cubes
+    from torchmcubes import marching_cubes
     USE_TORCH_MCUBES = True
 except ImportError:
     import mcubes
